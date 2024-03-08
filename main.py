@@ -66,6 +66,13 @@ def draw_thrust_level(thrust_level, engine_on):
     pygame.draw.rect(WIN, (255, 255, 255), (10, 10, 100, 20))
     pygame.draw.rect(WIN, gauge_color, (10, 10, 100 * thrust_level, 20))
 
+def draw_rocket_info(win, vel, y):
+    vel_text = "Velocity: " + str(round(vel[1], 2)) + " m/s"
+    y_text = "Y: " + str(round(y, 2))
+    vel_text_surface = pygame.font.SysFont("arial", 15).render(vel_text, True, (255, 255, 255))
+    y_text_surface = pygame.font.SysFont("arial", 15).render(y_text, True, (255, 255, 255))
+    WIN.blit(vel_text_surface, (10, 40))
+    WIN.blit(y_text_surface, (10, 60))    
 
 def init_stars():
     for _ in range(100):
@@ -75,7 +82,6 @@ def init_stars():
 
 
 GRAVITY = 1.625 / 60  # m/s
-
 
 def draw_fire(x, y, thrust_level):
     flame_height = int(thrust_level * 20)
@@ -127,6 +133,7 @@ def main():
         rocket.draw(WIN)
 
         draw_thrust_level(rocket.thrust_level, rocket.engine_on)
+        draw_rocket_info(WIN, rocket.vel, rocket.y)
 
         # Update the display
         pygame.display.update()
