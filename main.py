@@ -9,6 +9,8 @@ rocket -> 3m x 2m -> 15px x 10px
 import random
 import pygame
 
+import polygon
+
 pygame.init()
 
 WIDTH, HEIGHT = 800, 500
@@ -34,6 +36,13 @@ class Rocket:
         self.mass = 1500  # in kg
         self.thrust_level = 0 # 0~1 -> 0~100%
         self.engine_on = False
+        self.polygon = polygon.Polygon(
+            (
+                ((self.x, self.y), (self.x + self.width, self.y)), # top
+                ((self.x + self.width, self.y), (self.x + self.width, self.y + self.height)), # right
+                ((self.x + self.width, self.y + self.height), (self.x, self.y + self.height)), # bottom
+                ((self.x, self.y + self.height), (self.x, self.y)) # left
+            ), self.color)
 
     # Draw the rocket
     def draw(self, win):
@@ -42,8 +51,16 @@ class Rocket:
     def update(self):
         self.x += convert_to_px(self.vel[0])
         self.y += convert_to_px(self.vel[1])
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.polygon = polygon.Polygon(
+            (
+                ((self.x, self.y), (self.x + self.width, self.y)),  # top
+                ((self.x + self.width, self.y), (self.x + \
+                 self.width, self.y + self.height)),  # right
+                ((self.x + self.width, self.y + self.height),
+                 (self.x, self.y + self.height)),  # bottom
+                ((self.x, self.y + self.height), (self.x, self.y))  # left
+            ), self.color)
 
 
 stars = []
@@ -102,6 +119,14 @@ def draw_fire(x, y, thrust_level):
 def main():
 
     init_stars()
+    
+    floor_polygon = polygon.Polygon(
+        (
+            ((0, HEIGHT-20), (WIDTH, HEIGHT-20)), # top
+            ((WIDTH, HEIGHT-20), (WIDTH, HEIGHT)), # right
+            ((WIDTH, HEIGHT), (0, HEIGHT)), # bottom
+            ((0, HEIGHT), (0, HEIGHT-20)) # left
+        ), (255, 255, 255))
 
     run = True
     while run:
@@ -117,6 +142,15 @@ def main():
         if rocket.y + rocket.height >= HEIGHT:
             rocket.vel[1] = 0
             rocket.y = HEIGHT - rocket.height
+        if rocket.polygon.collides_with(floor_polygon):
+            print("A") #not work
+            rocket.vel[1] = 0
+            rocket.y = 20 - HEIGHT - rocket.height
+        if floor_polygon.point_inside((rocket.x, rocket.y)):
+            print("B") #not working :(
+            rocket.vel[1] = 0
+            rocket.y = 20 - HEIGHT - rocket.height
+        
             
         if rocket.engine_on:
             # 2700 N thrust
